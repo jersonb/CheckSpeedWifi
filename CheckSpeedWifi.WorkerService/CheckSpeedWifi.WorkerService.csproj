@@ -12,4 +12,8 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.5" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ExecuteTerminal\ExecuteTerminal.csproj" />
+  </ItemGroup>
 </Project>
