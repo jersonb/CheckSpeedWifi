@@ -12,15 +12,25 @@ namespace CheckSpeedWifi.WorkerService
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                if (_logger.IsEnabled(LogLevel.Information))
-                {
-                    var command = "speedtest-cli --json";
-                    var response = await command.ExecuteCommandBashAsync(stoppingToken);
-                    var result = JsonSerializer.Deserialize<SpeedTestCliResult>(response)!;
+                await CheckSpeedWifi(stoppingToken);
 
-                    _logger.LogInformation("Result: {@result}", result.ToString());
-                }
-                await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
+                await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken);
+            }
+        }
+
+        private async Task CheckSpeedWifi(CancellationToken stoppingToken)
+        {
+            try
+            {
+                var command = "speedtest-cli --json";
+                var response = await command.ExecuteCommandBashAsync(stoppingToken);
+                var result = JsonSerializer.Deserialize<SpeedTestCliResult>(response)!;
+                Console.WriteLine(result);
+                _logger.LogInformation("Executed: {@AtTime}", DateTimeOffset.Now);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Problem: {@AtTime}", DateTimeOffset.Now);
             }
         }
     }
