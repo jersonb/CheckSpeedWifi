@@ -3,7 +3,7 @@ using Coravel;
 using Serilog;
 
 var builder = Host.CreateApplicationBuilder(args);
-Console.WriteLine("On init...");
+Console.WriteLine("On init with watchtower...");
 
 var services = builder.Services;
 services.AddSerilog(lc =>
