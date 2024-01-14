@@ -14,13 +14,20 @@ namespace CheckSpeedWifi.WorkerService
             try
             {
                 var command = "speedtest-cli --json";
+
                 var response = await command.ExecuteCommandBashAsync();
-                var result = JsonSerializer.Deserialize<SpeedTestCliResult>(response)!;
-                _logger.LogInformation("Executed: {@AtTime} Download: {@Download} Upload: {@Upload}", DateTimeOffset.Now, result.Download, result.Upload);
+
+                _ = response ?? throw new InvalidDataException("No data, internet is Ok?");
+
+                var result = JsonSerializer.Deserialize<SpeedTestCliResult>(response);
+
+                _ = result ?? throw new InvalidCastException("Error on deserialization");
+
+                _logger.LogInformation("Download: {@Download} Upload: {@Upload} Ping: {@Ping}", result.Download, result.Upload, result.Ping);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Problem: {@AtTime}", DateTimeOffset.Now);
+                _logger.LogError(ex, "Problem!");
             }
         }
     }
