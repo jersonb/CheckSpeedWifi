@@ -13,11 +13,10 @@ namespace CheckSpeedWifi.WorkerService
         {
             try
             {
-                //var command = "speedtest-cli --json";
-                //var response = await command.ExecuteCommandBashAsync();
-                //var result = JsonSerializer.Deserialize<SpeedTestCliResult>(response)!;
-                //Console.WriteLine(result);
-                _logger.LogInformation("Executed: {@AtTime}", DateTimeOffset.Now);
+                var command = "speedtest-cli --json";
+                var response = await command.ExecuteCommandBashAsync();
+                var result = JsonSerializer.Deserialize<SpeedTestCliResult>(response)!;
+                _logger.LogInformation("Executed: {@AtTime} Download: {@Download} Upload: {@Upload}", DateTimeOffset.Now, result.Download, result.Upload);
             }
             catch (Exception ex)
             {
