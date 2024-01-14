@@ -28,7 +28,6 @@ jobs:
           images: jersonb/check-wifi
           tags: |
             latest 
-            $(date +%s)
             type=schedule
       
       - name: Build and push Docker image
