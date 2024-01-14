@@ -14,6 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CheckSpeedWifi.Domain\CheckSpeedWifi.Domain.csproj" />
     <ProjectReference Include="..\ExecuteTerminal\ExecuteTerminal.csproj" />
   </ItemGroup>
 </Project>

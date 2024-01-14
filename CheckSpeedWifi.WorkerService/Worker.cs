@@ -1,3 +1,5 @@
+using System.Text.Json;
+using CheckSpeedWifi.Domain;
 using ExecuteTerminal;
 
 namespace CheckSpeedWifi.WorkerService
@@ -12,9 +14,11 @@ namespace CheckSpeedWifi.WorkerService
             {
                 if (_logger.IsEnabled(LogLevel.Information))
                 {
-                    var command = "date";
-                    var result = await command.ExecuteCommandBashAsync(stoppingToken);
-                    _logger.LogInformation("Worker running at: {time}", result);
+                    var command = "speedtest-cli --json";
+                    var response = await command.ExecuteCommandBashAsync(stoppingToken);
+                    var result = JsonSerializer.Deserialize<SpeedTestCliResult>(response)!;
+
+                    _logger.LogInformation("Result: {@result}", result.ToString());
                 }
                 await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
             }
