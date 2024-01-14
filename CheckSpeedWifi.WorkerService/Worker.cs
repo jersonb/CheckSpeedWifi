@@ -17,17 +17,35 @@ namespace CheckSpeedWifi.WorkerService
 
                 var response = await command.ExecuteCommandBashAsync();
 
-                _ = response ?? throw new InvalidDataException("No data, internet is Ok?");
+                ValidateResponse(response);
 
                 var result = JsonSerializer.Deserialize<SpeedTestCliResult>(response);
 
-                _ = result ?? throw new InvalidCastException("Error on deserialization");
+                _ = result ?? throw new InvalidCastException($"Error on deserialization: {result}");
 
-                _logger.LogInformation("Download: {@Download} Upload: {@Upload} Ping: {@Ping}", result.Download, result.Upload, result.Ping);
+                _logger.LogInformation("Download: {@Download} Upload: {@Upload} Ping: {@Ping}", result.Download / 1000000, result.Upload / 1000000, result.Ping);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Problem!");
+            }
+        }
+
+        private void ValidateResponse(string source)
+        {
+            if (string.IsNullOrEmpty(source))
+            {
+                throw new InvalidDataException("No data, internet is Ok?");
+            }
+
+            try
+            {
+                JsonDocument.Parse(source);
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogWarning(ex, "Error: {@source}", source);
+                throw;
             }
         }
     }
