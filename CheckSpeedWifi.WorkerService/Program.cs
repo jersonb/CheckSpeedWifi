@@ -2,10 +2,10 @@ using CheckSpeedWifi.WorkerService;
 using Coravel;
 using Serilog;
 
+Console.WriteLine("CheckSpeedWifi starting...");
 var builder = Host.CreateApplicationBuilder(args);
-Console.WriteLine("On init with watchtower...");
-
 var services = builder.Services;
+
 services.AddSerilog(lc =>
 {
     lc.MinimumLevel.Debug()
@@ -24,10 +24,10 @@ host.Services.UseScheduler(scheduler =>
 {
     scheduler
     .Schedule<Worker>()
-    .EveryTenMinutes()
+    .EveryFifteenMinutes()
     .RunOnceAtStart()
     .PreventOverlapping(nameof(Worker));
 });
-Console.WriteLine("Application is started!");
+
+Console.WriteLine("CheckSpeedWifi started!");
 host.Run();
-Console.WriteLine("Application is finished!");

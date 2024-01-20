@@ -2,7 +2,7 @@
 
 FROM mcr.microsoft.com/dotnet/runtime:8.0 AS base
 RUN apt update && apt upgrade -y
-run apt install speedtest-cli -y
+RUN apt install speedtest-cli iputils-ping -y
 USER app
 WORKDIR /app
 
