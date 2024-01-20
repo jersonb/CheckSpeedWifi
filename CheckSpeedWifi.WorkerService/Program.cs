@@ -1,3 +1,4 @@
+using CheckSpeedWifi.Data;
 using CheckSpeedWifi.WorkerService;
 using Coravel;
 using Serilog;
@@ -14,6 +15,8 @@ services.AddSerilog(lc =>
       .WriteTo.Console(outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss zzz} {Level:u3}] {Message:lj}{NewLine}{Exception}");
 });
 
+services.AddSingleton<IDataService, DataService>();
+
 services.AddTransient<Worker>();
 
 services.AddScheduler();
@@ -28,6 +31,10 @@ host.Services.UseScheduler(scheduler =>
     .RunOnceAtStart()
     .PreventOverlapping(nameof(Worker));
 });
+
+var dataservice = host.Services.GetRequiredService<IDataService>();
+
+await dataservice.CreateDatabase();
 
 Console.WriteLine("CheckSpeedWifi started!");
 host.Run();
