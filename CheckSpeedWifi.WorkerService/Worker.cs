@@ -44,6 +44,7 @@ namespace CheckSpeedWifi.WorkerService
             }
             catch (Exception ex)
             {
+                await _dataService.Error(ex.Message);
                 _logger.LogError(ex, "Problem!");
             }
         }
@@ -54,7 +55,9 @@ namespace CheckSpeedWifi.WorkerService
 
             if (!internetIsAvaliable)
             {
-                _logger.LogCritical("Internet is not avaliable.");
+                var message = "Internet is not avaliable.";
+                await _dataService.Error(message);
+                _logger.LogCritical(message);
                 return;
             }
 

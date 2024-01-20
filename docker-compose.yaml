@@ -1,0 +1,37 @@
+
+version: '3.8'
+
+# networks:
+#   check-wifi:
+#     driver:
+#       bridge
+
+services:
+  postgresql:
+    container_name: postgres
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: MyPass01
+      POSTGRES_USER: checkwifi
+      POSTGRES_DB: base
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    # networks:
+    #   - check-wifi
+
+  # checkwifi:
+  #   image: checkwifi
+  #   depends_on:
+  #     - postgresql
+  #   container_name: checkwifi
+  #   environment:
+  #     ConnectionStrings__Postgres: "Server=localhost;Port=5432;Database=base;User Id=checkwifi;Password=MyPass01;"
+  #   restart: always
+  #   networks:
+  #     - check-wifi
+
+volumes:
+  postgres:
