@@ -1,7 +1,7 @@
-﻿using System.Net.NetworkInformation;
-using Dapper;
+﻿using Dapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 
 namespace CheckSpeedWifi.Data
 {
@@ -12,6 +12,8 @@ namespace CheckSpeedWifi.Data
 
         private readonly ILogger<DataService> _logger = logger;
 
+        private NpgsqlConnection GetConnection()
+            => new(_connectionString);
         public async Task CreateDatabase()
         {
             var sqlCommand = @"
@@ -37,7 +39,7 @@ namespace CheckSpeedWifi.Data
 
             try
             {
-                using var connection = new Npgsql.NpgsqlConnection(_connectionString);
+                using var connection = GetConnection();
 
                 connection.Open();
                 await connection.ExecuteAsync(sqlCommand);
@@ -60,7 +62,7 @@ namespace CheckSpeedWifi.Data
 
             try
             {
-                using var connection = new Npgsql.NpgsqlConnection(_connectionString);
+                using var connection = GetConnection();
 
                 connection.Open();
                 await connection.ExecuteAsync(sqlCommand, new { download, upload, ping, audit = audit.ToString() });
@@ -71,7 +73,7 @@ namespace CheckSpeedWifi.Data
                 throw;
             }
         }
-        public async Task Error(string message) 
+        public async Task Error(string message)
         {
             var sqlCommand = @"
                 INSERT INTO checkspeedwifi.error
@@ -81,10 +83,10 @@ namespace CheckSpeedWifi.Data
 
             try
             {
-                using var connection = new Npgsql.NpgsqlConnection(_connectionString);
+                using var connection = GetConnection();
 
                 connection.Open();
-                await connection.ExecuteAsync(sqlCommand, new { message});
+                await connection.ExecuteAsync(sqlCommand, new { message });
             }
             catch (Exception ex)
             {
@@ -92,5 +94,42 @@ namespace CheckSpeedWifi.Data
                 throw;
             }
         }
+
+        public async Task SendReportStats()
+        {
+
+            var query = @"
+                select 
+                    (avg(m.download)/1000000)::numeric(10,2) ""Download"",
+                    (avg(m.upload)/1000000)::numeric(10,2) ""Upload"",
+                    avg(m.ping)::numeric(10,2) ""Ping""
+                from checkspeedwifi.measurementwifi m 
+                where m.""date"" > (now() - interval '7 day')
+            ";
+            using var connection = GetConnection();
+            connection.Open();
+
+            var result = await connection.QueryAsync<StatsAverageQueryResult>(query);
+        }
+
+        public async Task SendReportErrors()
+        {
+
+            var query = @"
+                select 
+                    e.""date""::date ""Date"", 
+                    count(*)::int ""ErrorCount""
+                from checkspeedwifi.error e 
+                where e.""date"" between (now() - interval '7 day') and (now() - interval '1 day')
+                group by e.""date""::date
+                order by e.""date""::date desc
+            ";
+            using var connection = GetConnection();
+            connection.Open();
+
+            var result = await connection.QueryAsync<ErrorQueryResult>(query);
+        }
+        private record StatsAverageQueryResult(decimal Download, decimal Upload, decimal Ping);
+        private record ErrorQueryResult(DateOnly Date, int ErrorCount);
     }
 }
