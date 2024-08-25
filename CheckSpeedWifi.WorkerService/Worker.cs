@@ -58,7 +58,8 @@ namespace CheckSpeedWifi.WorkerService
                 var message = "Internet is not avaliable.";
                 await _dataService.Error(message);
                 _logger.LogCritical(message);
-                return;
+                await Task.Delay(TimeSpan.FromMinutes(1));
+                await Execute();
             }
 
             var command = "speedtest-cli --json";
